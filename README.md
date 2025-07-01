@@ -2,7 +2,7 @@
 
 A next-generation HR Performance Dashboard built with Next.js, Tailwind CSS, and Zustand. This platform empowers HR professionals to manage employee data, track performance, and make data-driven decisions with advanced analytics and modern UI/UX.
 
-![HR Dashboard Preview](public\screenshots\dashboard.png)
+![HR Dashboard Preview](public/screenshots/dashboard.png)
 
 ## 🚀 Key Features
 
