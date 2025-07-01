@@ -91,6 +91,10 @@ A next-generation HR Performance Dashboard built with Next.js, Tailwind CSS, and
 ### Analytics
 ![Analytics](public/screenshots/analytics.png)
 
+### Leave Management
+![Leave Management](public/screenshots/leave.png)
+*Leave management modal and features*
+
 ### Bookmarks
 ![Bookmarks](public/screenshots/bookmarks.png)
 
