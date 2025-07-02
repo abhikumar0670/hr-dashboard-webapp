@@ -110,7 +110,7 @@ export default function BookmarksPage() {
                   <Button
                     variant="secondary"
                     className="flex-1"
-                    onClick={() => promoteEmployee(employee.id)}
+                    onClick={() => promoteEmployee(employee.id, 'Senior ' + employee.position)}
                   >
                     Promote
                   </Button>
