@@ -61,7 +61,7 @@ export function CreateUserModal({ isOpen, onClose }: CreateUserModalProps) {
     return Object.keys(newErrors).length === 0
   }
 
-  const getRandomFromArray = (arr, count = 1) => {
+  const getRandomFromArray = (arr: any[], count = 1) => {
     const shuffled = arr.slice().sort(() => 0.5 - Math.random())
     return shuffled.slice(0, count)
   }
