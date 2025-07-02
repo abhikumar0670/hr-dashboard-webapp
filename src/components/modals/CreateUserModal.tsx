@@ -73,12 +73,16 @@ export function CreateUserModal({ isOpen, onClose }: CreateUserModalProps) {
     rating: Number((Math.random() * 2 + 3).toFixed(1)),
     review: 'Good performance with room for improvement in specific areas.'
   }))
-  const randomProjects = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, (_, i) => ({
-    id: `proj-new-${Date.now()}-${i}`,
-    name: `Project ${i + 1}`,
-    progress: Math.floor(Math.random() * 100),
-    status: ['active', 'completed', 'pending'][Math.floor(Math.random() * 3)]
-  }))
+  const randomProjects = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, (_, i) => {
+    const statusOptions = ['active', 'completed', 'pending'] as const;
+    const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+    return {
+      id: `proj-new-${Date.now()}-${i}`,
+      name: `Project ${i + 1}`,
+      progress: Math.floor(Math.random() * 100),
+      status: status as 'active' | 'pending' | 'completed',
+    };
+  })
   const randomGoals = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, (_, i) => ({
     id: `goal-new-${Date.now()}-${i}`,
     title: `Goal ${i + 1}`,
