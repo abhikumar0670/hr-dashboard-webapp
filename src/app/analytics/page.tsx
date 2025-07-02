@@ -385,7 +385,7 @@ export default function AnalyticsPage() {
                   <div>
                     <span className="font-medium">{dept.department}</span>
                     <div className="text-sm text-gray-500">
-                      {dept.count} employees ({dept.percentage}%)
+                      {String(dept.count)} employees ({String(dept.percentage)}%)
                     </div>
                   </div>
                   <div className="text-right">
