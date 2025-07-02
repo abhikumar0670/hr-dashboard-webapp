@@ -405,7 +405,7 @@ export default function DashboardPage() {
                   <EmployeeDetailsCard
                     employee={employee}
                     onBookmarkToggle={toggleBookmark}
-                    onPromote={promoteEmployee}
+                    onPromote={(id) => promoteEmployee(id, 'Senior ' + employee.position)}
                     isSelected={selectedEmployees.includes(employee.id)}
                     onSelect={handleEmployeeSelect}
                     showCheckbox={true}
