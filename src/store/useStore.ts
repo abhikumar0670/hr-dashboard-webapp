@@ -128,6 +128,7 @@ type Store = {
   addEmployeeGoal: (employeeId: number, goal: Employee['goals'][0]) => void
   updateGoalStatus: (employeeId: number, goalId: string, status: Employee['goals'][0]['status']) => void
   updateProjectStatus: (employeeId: number, projectId: string, status: 'active' | 'completed' | 'pending', progress: number) => void
+  addEmployeeProject: (employeeId: number, project: Employee['projects'][0]) => void
   submitLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'submittedAt' | 'status'>) => void
   approveLeaveRequest: (requestId: string, approvedBy: string, comments?: string) => void
   rejectLeaveRequest: (requestId: string, approvedBy: string, comments?: string) => void
@@ -375,6 +376,15 @@ export const useStore = create<Store>()(
           ],
         }))
       },
+      
+      addEmployeeProject: (employeeId, project) =>
+        set((state) => ({
+          employees: state.employees.map((emp) =>
+            emp.id === employeeId
+              ? { ...emp, projects: [...emp.projects, project] }
+              : emp
+          ),
+        })),
       
       submitLeaveRequest: (request) => {
         const newRequest: LeaveRequest = {

@@ -71,7 +71,7 @@ export function Navbar() {
               >
                 Analytics
               </Link>
-                <Link
+              <Link
                 href="/bookmarks"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   pathname === '/bookmarks'
@@ -80,6 +80,16 @@ export function Navbar() {
                   }`}
                 >
                 Bookmarks
+                </Link>
+                <Link
+                href="/projects"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  pathname === '/projects'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                Projects
                 </Link>
             </div>
           </div>
