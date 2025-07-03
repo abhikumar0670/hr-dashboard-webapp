@@ -128,7 +128,7 @@ export function LeaveRequestModal({ isOpen, onClose, employeeId, employeeName }:
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onClose={handleClose}>
       <DialogContent className="w-full h-full rounded-none p-0 flex flex-col sm:max-w-lg sm:h-auto sm:rounded-lg sm:p-6">
         <DialogHeader className="sticky top-0 z-10 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 sm:static sm:p-0">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-2xl">

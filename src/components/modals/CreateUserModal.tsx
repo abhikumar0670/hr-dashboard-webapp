@@ -83,13 +83,17 @@ export function CreateUserModal({ isOpen, onClose }: CreateUserModalProps) {
       status: status as 'active' | 'pending' | 'completed',
     };
   })
-  const randomGoals = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, (_, i) => ({
-    id: `goal-new-${Date.now()}-${i}`,
-    title: `Goal ${i + 1}`,
-    description: 'Improve performance and achieve targets',
-    targetDate: new Date(2024 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-    status: ['pending', 'in-progress', 'completed'][Math.floor(Math.random() * 3)]
-  }))
+  const randomGoals = Array.from({ length: Math.floor(Math.random() * 2) + 1 }, (_, i) => {
+    const statusOptions = ['pending', 'in-progress', 'completed'] as const;
+    const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+    return {
+      id: `goal-new-${Date.now()}-${i}`,
+      title: `Goal ${i + 1}`,
+      description: 'Improve performance and achieve targets',
+      targetDate: new Date(2024 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+      status: status as 'pending' | 'in-progress' | 'completed'
+    }
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,7 +112,7 @@ export function CreateUserModal({ isOpen, onClose }: CreateUserModalProps) {
       phone: formData.phone,
       bio: formData.bio || 'Experienced professional with a strong track record in their field.',
       isBookmarked: false,
-      status: 'active',
+      status: 'active' as 'active' | 'inactive' | 'terminated' | 'on leave',
       salary: 500000,
       hireDate: new Date().toISOString().split('T')[0],
       managerId: undefined,

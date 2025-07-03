@@ -168,21 +168,29 @@ export default function DashboardPage() {
               }))
 
               // Generate projects
-              const projects = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => ({
-                id: `proj-${index}-${i}`,
-                name: `Project ${i + 1}`,
-                progress: Math.floor(Math.random() * 100),
-                status: ['active', 'completed', 'pending'][Math.floor(Math.random() * 3)] as 'active' | 'completed' | 'pending'
-              }))
+              const projectStatusOptions = ['active', 'completed', 'pending'] as const;
+              const projects = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => {
+                const status = projectStatusOptions[Math.floor(Math.random() * projectStatusOptions.length)];
+                return {
+                  id: `proj-${index}-${i}`,
+                  name: `Project ${i + 1}`,
+                  progress: Math.floor(Math.random() * 100),
+                  status: status as 'active' | 'completed' | 'pending'
+                }
+              })
 
               // Generate goals
-              const goals = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => ({
-                id: `goal-${index}-${i}`,
-                title: `Goal ${i + 1}`,
-                description: 'Improve performance and achieve targets',
-                targetDate: new Date(2024 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                status: ['pending', 'in-progress', 'completed'][Math.floor(Math.random() * 3)] as 'pending' | 'in-progress' | 'completed'
-              }))
+              const goalStatusOptions = ['pending', 'in-progress', 'completed'] as const;
+              const goals = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => {
+                const status = goalStatusOptions[Math.floor(Math.random() * goalStatusOptions.length)];
+                return {
+                  id: `goal-${index}-${i}`,
+                  title: `Goal ${i + 1}`,
+                  description: 'Improve performance and achieve targets',
+                  targetDate: new Date(2024 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+                  status: status as 'pending' | 'in-progress' | 'completed'
+                }
+              })
 
           return {
             id: user.id,
