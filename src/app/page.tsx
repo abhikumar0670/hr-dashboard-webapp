@@ -216,7 +216,11 @@ export default function DashboardPage() {
                 goals,
                 lastReviewDate: performanceHistory[0]?.date,
                 nextReviewDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                status: ['active', 'active', 'active', 'inactive', 'on leave'][Math.floor(Math.random() * 5)] as 'active' | 'inactive' | 'terminated' | 'on leave'
+                status: (() => {
+                  const statuses = ['active', 'active', 'active', 'active', 'inactive', 'terminated', 'on leave'] as const;
+                  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                  return randomStatus as 'active' | 'inactive' | 'terminated' | 'on leave';
+                })()
           }
         })
         setEmployees(processedEmployees)

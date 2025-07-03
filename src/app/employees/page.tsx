@@ -120,11 +120,12 @@ export default function EmployeesPage() {
 
   // Determine which employees to show based on tab
   let employeesToShow = filteredEmployees
-  if (employeeTab === 'all') employeesToShow = employees // show all employees, unfiltered
-  if (employeeTab === 'active') employeesToShow = employees.filter(emp => emp.status === 'active')
-  if (employeeTab === 'inactive') employeesToShow = employees.filter(emp => emp.status === 'inactive')
-  if (employeeTab === 'terminated') employeesToShow = employees.filter(emp => emp.status === 'terminated')
-  if (employeeTab === 'on leave') employeesToShow = employees.filter(emp => emp.status === 'on leave')
+  if (employeeTab === 'all') {
+    employeesToShow = filteredEmployees // show filtered employees
+  } else {
+    // Apply tab filter on top of existing filters
+    employeesToShow = filteredEmployees.filter(emp => emp.status === employeeTab)
+  }
 
   return (
     <div className="space-y-8">
