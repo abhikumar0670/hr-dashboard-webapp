@@ -320,7 +320,13 @@ export const useStore = create<Store>()(
           ),
         })),
       
-      updateGoalStatus: (employeeId, goalId, status) =>
+      updateGoalStatus: (employeeId, goalId, status) => {
+        const employee = get().employees.find(emp => emp.id === employeeId)
+        if (!employee) return
+        
+        const goal = employee.goals.find(g => g.id === goalId)
+        if (!goal) return
+        
         set((state) => ({
           employees: state.employees.map((emp) =>
             emp.id === employeeId
@@ -332,7 +338,21 @@ export const useStore = create<Store>()(
                 }
               : emp
           ),
-        })),
+          notifications: [
+            {
+              id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9),
+              date: new Date().toISOString(),
+              employeeId: employeeId,
+              employeeName: employee ? `${employee.firstName} ${employee.lastName}` : '',
+              oldStatus: goal.status,
+              newStatus: status,
+              reason: `Goal "${goal.title}" status updated to ${status}`,
+              read: false,
+            },
+            ...state.notifications,
+          ],
+        }))
+      },
       
       updateProjectStatus: (employeeId, projectId, status, progress) => {
         const employee = get().employees.find(emp => emp.id === employeeId)
