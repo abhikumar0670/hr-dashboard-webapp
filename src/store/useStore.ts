@@ -127,6 +127,7 @@ type Store = {
   assignManager: (employeeId: number, managerId: number) => void
   addEmployeeGoal: (employeeId: number, goal: Employee['goals'][0]) => void
   updateGoalStatus: (employeeId: number, goalId: string, status: Employee['goals'][0]['status']) => void
+  updateProjectStatus: (employeeId: number, projectId: string, status: 'active' | 'completed' | 'pending', progress: number) => void
   submitLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'submittedAt' | 'status'>) => void
   approveLeaveRequest: (requestId: string, approvedBy: string, comments?: string) => void
   rejectLeaveRequest: (requestId: string, approvedBy: string, comments?: string) => void
@@ -331,6 +332,49 @@ export const useStore = create<Store>()(
               : emp
           ),
         })),
+      
+      updateProjectStatus: (employeeId, projectId, status, progress) => {
+        const employee = get().employees.find(emp => emp.id === employeeId)
+        if (!employee) return
+        
+        set((state) => ({
+          employees: state.employees.map((emp) =>
+            emp.id === employeeId
+              ? {
+                  ...emp,
+                  projects: emp.projects.map((project) => {
+                    if (project.id === projectId) {
+                      const oldStatus = project.status
+                      const oldProgress = project.progress
+                      // If status changes from completed to pending, adjust progress
+                      let newProgress = progress
+                      if (oldStatus === 'completed' && status === 'pending') {
+                        newProgress = Math.min(progress, 80) // Cap at 80% when reverting
+                      } else if (status === 'completed') {
+                        newProgress = 100 // Always 100% when completed
+                      }
+                      return { ...project, status, progress: newProgress }
+                    }
+                    return project
+                  }),
+                }
+              : emp
+          ),
+          notifications: [
+            {
+              id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9),
+              date: new Date().toISOString(),
+              employeeId: employeeId,
+              employeeName: employee ? `${employee.firstName} ${employee.lastName}` : '',
+              oldStatus: '',
+              newStatus: '',
+              reason: `Project status updated to ${status} (${progress}% complete)`,
+              read: false,
+            },
+            ...state.notifications,
+          ],
+        }))
+      },
       
       submitLeaveRequest: (request) => {
         const newRequest: LeaveRequest = {

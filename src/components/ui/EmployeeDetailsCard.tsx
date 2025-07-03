@@ -37,6 +37,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { LeaveRequestModal } from '@/components/modals/LeaveRequestModal'
 import { PromotionModal } from '@/components/modals/PromotionModal'
+import { ProjectManagementModal } from '@/components/modals/ProjectManagementModal'
 
 interface EmployeeDetailsCardProps {
   employee: any
@@ -57,6 +58,8 @@ export function EmployeeDetailsCard({
 }: EmployeeDetailsCardProps) {
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false)
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<{ id: string; name: string } | null>(null)
 
   return (
     <>
@@ -307,17 +310,38 @@ export function EmployeeDetailsCard({
                   <div key={project.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">{project.name}</span>
-                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${getProjectStatusColor(project.status)}`}>
-                        {project.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getProjectStatusColor(project.status)}`}>
+                          {project.status}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedProject({ id: project.id, name: project.name })
+                            setIsProjectModalOpen(true)
+                          }}
+                          className="text-xs px-2 py-1 h-6"
+                        >
+                          Manage
+                        </Button>
+                      </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full" 
+                        className={`h-2 rounded-full ${
+                          project.status === 'completed' ? 'bg-green-600' : 
+                          project.status === 'active' ? 'bg-blue-600' : 'bg-yellow-600'
+                        }`}
                         style={{ width: `${project.progress}%` }}
                       ></div>
                     </div>
-                    <span className="text-xs text-gray-500 mt-1">{project.progress}% complete</span>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-gray-500">{project.progress}% complete</span>
+                      {project.status === 'completed' && project.progress === 100 && (
+                        <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -426,6 +450,20 @@ export function EmployeeDetailsCard({
         employeeName={`${employee.firstName} ${employee.lastName}`}
         currentPosition={employee.position}
       />
+
+      {selectedProject && (
+        <ProjectManagementModal
+          isOpen={isProjectModalOpen}
+          onClose={() => {
+            setIsProjectModalOpen(false)
+            setSelectedProject(null)
+          }}
+          employeeId={employee.id}
+          projectId={selectedProject.id}
+          employeeName={`${employee.firstName} ${employee.lastName}`}
+          projectName={selectedProject.name}
+        />
+      )}
 
       {/* Promotion History */}
       {employee.promotionHistory && employee.promotionHistory.length > 0 && (
