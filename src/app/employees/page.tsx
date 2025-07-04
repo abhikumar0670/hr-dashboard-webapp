@@ -45,6 +45,7 @@ export default function EmployeesPage() {
   const [employeeTab, setEmployeeTab] = useState<'all' | 'active' | 'inactive' | 'terminated' | 'on leave'>('all')
   const [promotionModalEmployeeId, setPromotionModalEmployeeId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid')
 
   useEffect(() => {
     // Load employees if not already loaded
@@ -346,19 +347,34 @@ export default function EmployeesPage() {
         </button>
       </div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Employees ({employees.length})</h1>
-        <Button
-          onClick={() => {
-            // Clear storage and force reload
-            localStorage.removeItem('hr-dashboard-storage')
-            window.location.reload()
-          }}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <ArrowPathIcon className="h-4 w-4" />
-          Refresh Data
-        </Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {employeeTab === 'all' && `All Employees (${employeesToShow.length})`}
+          {employeeTab === 'active' && `Active Employees (${employeesToShow.length})`}
+          {employeeTab === 'inactive' && `Inactive Employees (${employeesToShow.length})`}
+          {employeeTab === 'terminated' && `Terminated Employees (${employeesToShow.length})`}
+          {employeeTab === 'on leave' && `On Leave Employees (${employeesToShow.length})`}
+        </h1>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setViewMode(viewMode === 'grid' ? 'compact' : 'grid')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {viewMode === 'grid' ? 'Compact View' : 'Grid View'}
+          </Button>
+          <Button
+            onClick={() => {
+              // Clear storage and force reload
+              localStorage.removeItem('hr-dashboard-storage')
+              window.location.reload()
+            }}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowPathIcon className="h-4 w-4" />
+            Refresh Data
+          </Button>
+        </div>
       </div>
       <AdvancedFilters
         searchQuery={searchQuery}
@@ -392,107 +408,182 @@ export default function EmployeesPage() {
       {/* Employee Grid (filtered by tab) */}
       <div>
         {employeesToShow.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className={viewMode === 'grid' 
+            ? "grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+            : "grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8"
+          }>
             {employeesToShow.map((employee, index) => (
-              <AnimatedCard key={employee.id} index={index}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedEmployees.includes(employee.id)}
-                        onChange={() => {
-                          if (selectedEmployees.includes(employee.id)) {
-                            setSelectedEmployees(selectedEmployees.filter((id) => id !== employee.id))
-                          } else {
-                            setSelectedEmployees([...selectedEmployees, employee.id])
-                          }
-                        }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <div>
-                        <CardTitle>
-                          {employee.firstName} {employee.lastName}
-                        </CardTitle>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          {employee.email}
-                        </p>
+              viewMode === 'grid' ? (
+                <AnimatedCard key={employee.id} index={index}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedEmployees.includes(employee.id)}
+                          onChange={() => {
+                            if (selectedEmployees.includes(employee.id)) {
+                              setSelectedEmployees(selectedEmployees.filter((id) => id !== employee.id))
+                            } else {
+                              setSelectedEmployees([...selectedEmployees, employee.id])
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <CardTitle>
+                            {employee.firstName} {employee.lastName}
+                          </CardTitle>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            {employee.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleBookmark(employee.id)}
+                      >
+                        <BookmarkIcon
+                          className={`h-5 w-5 ${
+                            employee.isBookmarked
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-400'
+                          }`}
+                        />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Department
+                        </span>
+                        <span
+                          className={`rounded-full px-2 py-1 text-xs font-medium ${getDepartmentColor(
+                            employee.department
+                          )}`}
+                        >
+                          {employee.department}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Age
+                        </span>
+                        <span className="text-sm font-medium">
+                          {employee.age} years
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Performance
+                        </span>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span key={star}>
+                              {star <= Math.floor(employee.performance) ? (
+                                <StarIcon className="h-4 w-4 text-yellow-400" />
+                              ) : (
+                                <StarOutlineIcon className="h-4 w-4 text-gray-300" />
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/employee/${employee.id}`}
+                          className="btn btn-primary flex-1"
+                        >
+                          View Details
+                        </Link>
+                        <Button
+                          variant="secondary"
+                          className="flex-1"
+                          onClick={() => setPromotionModalEmployeeId(employee.id)}
+                        >
+                          Promote
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleBookmark(employee.id)}
-                    >
-                      <BookmarkIcon
-                        className={`h-5 w-5 ${
-                          employee.isBookmarked
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-400'
-                        }`}
-                      />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Department
-                      </span>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${getDepartmentColor(
-                          employee.department
-                        )}`}
-                      >
-                        {employee.department}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Age
-                      </span>
-                      <span className="text-sm font-medium">
-                        {employee.age} years
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Performance
-                      </span>
-                      <div className="flex items-center">
+                  </CardContent>
+                </AnimatedCard>
+              ) : (
+                // Compact view - smaller cards
+                <AnimatedCard key={employee.id} index={index}>
+                  <CardContent className="p-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="checkbox"
+                          checked={selectedEmployees.includes(employee.id)}
+                          onChange={() => {
+                            if (selectedEmployees.includes(employee.id)) {
+                              setSelectedEmployees(selectedEmployees.filter((id) => id !== employee.id))
+                            } else {
+                              setSelectedEmployees([...selectedEmployees, employee.id])
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleBookmark(employee.id)}
+                          className="p-1"
+                        >
+                          <BookmarkIcon
+                            className={`h-3 w-3 ${
+                              employee.isBookmarked
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-400'
+                            }`}
+                          />
+                        </Button>
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {employee.firstName} {employee.lastName}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {employee.position}
+                        </p>
+                        <span
+                          className={`inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-medium ${getDepartmentColor(
+                            employee.department
+                          )}`}
+                        >
+                          {employee.department}
+                        </span>
+                      </div>
+                      <div className="flex justify-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span key={star}>
                             {star <= Math.floor(employee.performance) ? (
-                              <StarIcon className="h-5 w-5 text-yellow-400" />
+                              <StarIcon className="h-3 w-3 text-yellow-400" />
                             ) : (
-                              <StarOutlineIcon className="h-5 w-5 text-gray-300" />
+                              <StarOutlineIcon className="h-3 w-3 text-gray-300" />
                             )}
                           </span>
                         ))}
                       </div>
+                      <div className="flex gap-1">
+                        <Link
+                          href={`/employee/${employee.id}`}
+                          className="btn btn-primary flex-1 text-xs py-1"
+                        >
+                          View
+                        </Link>
+                      </div>
                     </div>
-
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/employee/${employee.id}`}
-                        className="btn btn-primary flex-1"
-                      >
-                        View Details
-                      </Link>
-                      <Button
-                        variant="secondary"
-                        className="flex-1"
-                        onClick={() => setPromotionModalEmployeeId(employee.id)}
-                      >
-                        Promote
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </AnimatedCard>
+                  </CardContent>
+                </AnimatedCard>
+              )
             ))}
           </div>
         ) : (
