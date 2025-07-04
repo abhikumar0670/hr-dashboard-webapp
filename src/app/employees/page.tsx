@@ -306,43 +306,63 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Summary Row as Tabs */}
-      <div className="flex flex-wrap gap-4 mb-2">
+      <div className="flex flex-wrap gap-4">
         <button
-          className={`rounded-lg p-4 w-48 text-left transition-colors focus:outline-none ${employeeTab === 'all' ? 'bg-gray-900 ring-2 ring-blue-400' : 'bg-gray-900 hover:ring-2 hover:ring-blue-300'}`}
+          className={`rounded-lg p-3 min-w-[120px] text-left transition-colors focus:outline-none ${
+            employeeTab === 'all' 
+              ? 'bg-blue-600 ring-2 ring-blue-400' 
+              : 'bg-gray-700 hover:bg-gray-600'
+          }`}
           onClick={() => setEmployeeTab('all')}
         >
-          <div className="text-sm text-gray-200 font-semibold">Total Employees</div>
-          <div className="text-3xl font-bold text-white">{totalCount}</div>
+          <div className="text-xs text-gray-200 font-medium">Total Employees</div>
+          <div className="text-2xl font-bold text-white">{totalCount}</div>
         </button>
         <button
-          className={`rounded-lg p-4 w-48 text-left transition-colors focus:outline-none ${employeeTab === 'active' ? 'bg-green-800 ring-2 ring-green-400' : 'bg-green-900 hover:ring-2 hover:ring-green-300'}`}
+          className={`rounded-lg p-3 min-w-[120px] text-left transition-colors focus:outline-none ${
+            employeeTab === 'active' 
+              ? 'bg-green-600 ring-2 ring-green-400' 
+              : 'bg-green-700 hover:bg-green-600'
+          }`}
           onClick={() => setEmployeeTab('active')}
         >
-          <div className="text-sm text-green-200 font-semibold">Active Employees</div>
-          <div className="text-3xl font-bold text-white">{activeCount}</div>
+          <div className="text-xs text-green-200 font-medium">Active Employees</div>
+          <div className="text-2xl font-bold text-white">{activeCount}</div>
         </button>
         <button
-          className={`rounded-lg p-4 w-48 text-left transition-colors focus:outline-none ${employeeTab === 'inactive' ? 'bg-yellow-800 ring-2 ring-yellow-400' : 'bg-yellow-900 hover:ring-2 hover:ring-yellow-300'}`}
+          className={`rounded-lg p-3 min-w-[120px] text-left transition-colors focus:outline-none ${
+            employeeTab === 'inactive' 
+              ? 'bg-orange-600 ring-2 ring-orange-400' 
+              : 'bg-orange-700 hover:bg-orange-600'
+          }`}
           onClick={() => setEmployeeTab('inactive')}
         >
-          <div className="text-sm text-yellow-200 font-semibold">Inactive Employees</div>
-          <div className="text-3xl font-bold text-white">{inactiveCount}</div>
+          <div className="text-xs text-orange-200 font-medium">Inactive Employees</div>
+          <div className="text-2xl font-bold text-white">{inactiveCount}</div>
         </button>
         <button
-          className={`rounded-lg p-4 w-48 text-left transition-colors focus:outline-none ${employeeTab === 'terminated' ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-900 hover:ring-2 hover:ring-red-300'}`}
+          className={`rounded-lg p-3 min-w-[120px] text-left transition-colors focus:outline-none ${
+            employeeTab === 'terminated' 
+              ? 'bg-red-600 ring-2 ring-red-400' 
+              : 'bg-red-700 hover:bg-red-600'
+          }`}
           onClick={() => setEmployeeTab('terminated')}
         >
-          <div className="text-sm text-red-200 font-semibold">Terminated Employees</div>
-          <div className="text-3xl font-bold text-white">{terminatedCount}</div>
+          <div className="text-xs text-red-200 font-medium">Terminated Employees</div>
+          <div className="text-2xl font-bold text-white">{terminatedCount}</div>
         </button>
         <button
-          className={`rounded-lg p-4 w-48 text-left transition-colors focus:outline-none ${employeeTab === 'on leave' ? 'bg-purple-800 ring-2 ring-purple-400' : 'bg-purple-900 hover:ring-2 hover:ring-purple-300'}`}
+          className={`rounded-lg p-3 min-w-[120px] text-left transition-colors focus:outline-none ${
+            employeeTab === 'on leave' 
+              ? 'bg-purple-600 ring-2 ring-purple-400' 
+              : 'bg-purple-700 hover:bg-purple-600'
+          }`}
           onClick={() => setEmployeeTab('on leave')}
         >
-          <div className="text-sm text-purple-200 font-semibold">On Leave Employees</div>
-          <div className="text-3xl font-bold text-white">{onLeaveCount}</div>
+          <div className="text-xs text-purple-200 font-medium">On Leave Employees</div>
+          <div className="text-2xl font-bold text-white">{onLeaveCount}</div>
         </button>
       </div>
       <div className="flex items-center justify-between">
@@ -366,34 +386,39 @@ export default function EmployeesPage() {
           Refresh Data
         </Button>
       </div>
-      <AdvancedFilters
-        searchQuery={searchQuery}
-        departmentFilter={departmentFilter}
-        performanceFilter={performanceFilter}
-        salaryRangeFilter={salaryRangeFilter}
-        positionFilter={positionFilter}
-        statusFilter={statusFilter}
-        hireDateFilter={hireDateFilter}
-        skillsFilter={skillsFilter}
-        onSearchChange={setSearchQuery}
-        onDepartmentChange={setDepartmentFilter}
-        onPerformanceChange={setPerformanceFilter}
-        onSalaryRangeChange={setSalaryRangeFilter}
-        onPositionChange={setPositionFilter}
-        onStatusChange={setStatusFilter}
-        onHireDateChange={setHireDateFilter}
-        onSkillsChange={setSkillsFilter}
-        onClearAll={() => {
-          setSearchQuery('')
-          setDepartmentFilter([])
-          setPerformanceFilter([])
-          setSalaryRangeFilter([0, 1000000])
-          setPositionFilter([])
-          setStatusFilter([])
-          setHireDateFilter({ start: '', end: '' })
-          setSkillsFilter([])
-        }}
-      />
+      {/* Search and Filters */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search employees..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => {
+            // Toggle advanced filters (for now just clear all)
+            setSearchQuery('')
+            setDepartmentFilter([])
+            setPerformanceFilter([])
+            setSalaryRangeFilter([0, 1000000])
+            setPositionFilter([])
+            setStatusFilter([])
+            setHireDateFilter({ start: '', end: '' })
+            setSkillsFilter([])
+          }}
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+          </svg>
+          Filters
+        </Button>
+      </div>
       
       {/* Employee Grid (filtered by tab) */}
       <div>
