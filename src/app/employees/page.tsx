@@ -10,12 +10,13 @@ import { useState, useEffect } from 'react'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { StarIcon as StarOutlineIcon, BookmarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { getDepartmentColor, formatCurrency } from '@/lib/utils'
+import { getDepartmentColor, formatCurrency, departments, positions, skills } from '@/lib/utils'
 import { PromotionModal } from '@/components/modals/PromotionModal'
 
 export default function EmployeesPage() {
   const {
     employees,
+    setEmployees,
     searchQuery,
     setSearchQuery,
     departmentFilter,
@@ -37,14 +38,181 @@ export default function EmployeesPage() {
     toggleBookmark,
     promoteEmployee,
     updateEmployeeStatusesForLeave,
+    initializeLeaveBalances,
   } = useStore()
 
   const [employeeTab, setEmployeeTab] = useState<'all' | 'active' | 'inactive' | 'terminated' | 'on leave'>('all')
   const [promotionModalEmployeeId, setPromotionModalEmployeeId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(12) // Show 12 cards per page by default
 
   useEffect(() => {
+    // Load employees if not already loaded
+    const loadEmployees = async () => {
+      if (employees.length === 0) {
+        setIsLoading(true)
+        try {
+          const response = await fetch('https://dummyjson.com/users?limit=20')
+          const data = await response.json()
+          
+          // Define Indian names for more realistic data
+          const indianNames = {
+            male: [
+              { firstName: 'Rahul', lastName: 'Sharma' },
+              { firstName: 'Arjun', lastName: 'Patel' },
+              { firstName: 'Vikram', lastName: 'Singh' },
+              { firstName: 'Rajesh', lastName: 'Kumar' },
+              { firstName: 'Amit', lastName: 'Gupta' },
+              { firstName: 'Suresh', lastName: 'Verma' },
+              { firstName: 'Deepak', lastName: 'Yadav' },
+              { firstName: 'Karan', lastName: 'Mishra' },
+              { firstName: 'Ravi', lastName: 'Chauhan' },
+              { firstName: 'Nitin', lastName: 'Joshi' },
+            ],
+            female: [
+              { firstName: 'Priya', lastName: 'Sharma' },
+              { firstName: 'Ananya', lastName: 'Patel' },
+              { firstName: 'Neha', lastName: 'Singh' },
+              { firstName: 'Pooja', lastName: 'Kumar' },
+              { firstName: 'Meera', lastName: 'Gupta' },
+              { firstName: 'Divya', lastName: 'Verma' },
+              { firstName: 'Riya', lastName: 'Yadav' },
+              { firstName: 'Sneha', lastName: 'Mishra' },
+              { firstName: 'Kavita', lastName: 'Chauhan' },
+              { firstName: 'Anjali', lastName: 'Joshi' },
+            ],
+          }
+          
+          const indianCities = [
+            { city: 'Mumbai', state: 'Maharashtra' },
+            { city: 'Delhi', state: 'Delhi' },
+            { city: 'Bangalore', state: 'Karnataka' },
+            { city: 'Hyderabad', state: 'Telangana' },
+            { city: 'Chennai', state: 'Tamil Nadu' },
+            { city: 'Kolkata', state: 'West Bengal' },
+            { city: 'Pune', state: 'Maharashtra' },
+            { city: 'Ahmedabad', state: 'Gujarat' },
+            { city: 'Jaipur', state: 'Rajasthan' },
+            { city: 'Lucknow', state: 'Uttar Pradesh' },
+          ]
+          
+          const indianLocations = [
+            'Andheri East',
+            'Koramangala',
+            'Bandra West',
+            'Salt Lake City',
+            'T Nagar',
+            'Indiranagar',
+            'Powai',
+            'Sector 62',
+            'Malviya Nagar',
+            'Gomti Nagar',
+          ]
+          
+          // Process and transform the data with enhanced Indian details
+          const processedEmployees = data.users.map((user: any, index: number) => {
+            const gender = user.gender.toLowerCase()
+            const nameList = indianNames[gender as keyof typeof indianNames]
+            const nameIndex = index % nameList.length
+            const { firstName, lastName } = nameList[nameIndex]
+            
+            // Create Indian-style email
+            const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.in`
+            
+            // Generate Indian phone number
+            const phoneNumber = `+91 ${Math.floor(Math.random() * 9000000000 + 1000000000)}`
+            
+            // Generate Indian address
+            const cityIndex = index % indianCities.length
+            const locationIndex = index % indianLocations.length
+            const { city, state } = indianCities[cityIndex]
+            const address = `${indianLocations[locationIndex]}, ${city}, ${state} - ${Math.floor(Math.random() * 900000 + 100000)}`
+            
+            // Generate enhanced employee data
+            const salary = Math.floor(Math.random() * 8000000 + 300000) // 3L to 80L
+            const hireDate = new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0]
+            const position = positions[Math.floor(Math.random() * positions.length)]
+            const employeeSkills = skills.slice(0, Math.floor(Math.random() * 6) + 2).sort(() => Math.random() - 0.5)
+            const performance = Number((Math.random() * 2 + 3).toFixed(1)) // Random rating between 3 and 5
+            
+            // Generate performance history
+            const performanceHistory = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => ({
+              date: new Date(2024 - i, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+              rating: Number((Math.random() * 2 + 3).toFixed(1)),
+              review: 'Good performance with room for improvement in specific areas.'
+            }))
+            
+            // Generate projects
+            const projectStatusOptions = ['active', 'completed', 'pending'] as const;
+            const projects = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => {
+              const status = projectStatusOptions[Math.floor(Math.random() * projectStatusOptions.length)];
+              return {
+                id: `proj-${index}-${i}`,
+                name: `Project ${i + 1}`,
+                progress: Math.floor(Math.random() * 100),
+                status: status as 'active' | 'completed' | 'pending'
+              }
+            })
+            
+            // Generate goals
+            const goalStatusOptions = ['pending', 'in-progress', 'completed'] as const;
+            const goals = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, i) => {
+              const status = goalStatusOptions[Math.floor(Math.random() * goalStatusOptions.length)];
+              return {
+                id: `goal-${index}-${i}`,
+                title: `Goal ${i + 1}`,
+                description: 'Improve performance and achieve targets',
+                targetDate: new Date(2024 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+                status: status as 'pending' | 'in-progress' | 'completed'
+              }
+            })
+            
+            return {
+              id: user.id,
+              firstName,
+              lastName,
+              email,
+              age: user.age,
+              department: departments[Math.floor(Math.random() * departments.length)],
+              performance,
+              address,
+              phone: phoneNumber,
+              bio: 'Experienced professional with a strong track record in their field. Demonstrates excellent leadership and technical skills.',
+              isBookmarked: false,
+              // Enhanced fields
+              salary,
+              hireDate,
+              managerId: Math.random() > 0.7 ? Math.floor(Math.random() * 20) + 1 : undefined,
+              position,
+              skills: employeeSkills,
+              performanceHistory,
+              leaveBalance: Math.floor(Math.random() * 20) + 5,
+              projects,
+              goals,
+              lastReviewDate: performanceHistory[0]?.date,
+              nextReviewDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+              status: (() => {
+                const statuses = ['active', 'active', 'active', 'active', 'inactive', 'terminated', 'on leave'] as const;
+                const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                return randomStatus as 'active' | 'inactive' | 'terminated' | 'on leave';
+              })()
+            }
+          })
+          setEmployees(processedEmployees)
+          // Initialize leave balances for all employees
+          initializeLeaveBalances(processedEmployees)
+        } catch (error) {
+          console.error('Error fetching employees:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+    
+    loadEmployees()
     updateEmployeeStatusesForLeave()
-  }, [updateEmployeeStatusesForLeave])
+  }, [setEmployees, initializeLeaveBalances, updateEmployeeStatusesForLeave, employees.length])
 
   // Filtering logic (reuse from dashboard)
   const filteredEmployees = employees.filter((employee) => {
@@ -119,12 +287,31 @@ export default function EmployeesPage() {
   const onLeaveCount = employees.filter(emp => emp.status === 'on leave').length
 
   // Determine which employees to show based on tab
-  let employeesToShow = filteredEmployees
+  let allEmployeesToShow = filteredEmployees
   if (employeeTab === 'all') {
-    employeesToShow = filteredEmployees // show filtered employees
+    allEmployeesToShow = filteredEmployees // show filtered employees
   } else {
     // Apply tab filter on top of existing filters
-    employeesToShow = filteredEmployees.filter(emp => emp.status === employeeTab)
+    allEmployeesToShow = filteredEmployees.filter(emp => emp.status === employeeTab)
+  }
+  
+  // Pagination logic
+  const totalPages = Math.ceil(allEmployeesToShow.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const employeesToShow = allEmployeesToShow.slice(startIndex, endIndex)
+  
+  // Reset current page if it's beyond available pages
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(1)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+      </div>
+    )
   }
 
   return (
@@ -196,10 +383,34 @@ export default function EmployeesPage() {
           setSkillsFilter([])
         }}
       />
+      {/* Employee Count Display and Items Per Page */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Showing {startIndex + 1}-{Math.min(endIndex, allEmployeesToShow.length)} of {allEmployeesToShow.length} employees
+          {employeeTab !== 'all' && ` (filtered by ${employeeTab})`}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-500 dark:text-gray-400">Show:</label>
+          <select 
+            value={itemsPerPage} 
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value))
+              setCurrentPage(1) // Reset to first page when changing items per page
+            }}
+            className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          >
+            <option value={6}>6 per page</option>
+            <option value={12}>12 per page</option>
+            <option value={20}>20 per page</option>
+            <option value={allEmployeesToShow.length}>Show All ({allEmployeesToShow.length})</option>
+          </select>
+        </div>
+      </div>
+      
       {/* Employee Grid (filtered by tab) */}
       <div>
         {employeesToShow.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {employeesToShow.map((employee, index) => (
               <AnimatedCard key={employee.id} index={index}>
                 <CardHeader>
@@ -304,6 +515,62 @@ export default function EmployeesPage() {
           </div>
         ) : (
           <div className="text-gray-400">No employees found.</div>
+        )}
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-between">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              
+              {/* Page number buttons */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="min-w-[2rem]"
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         )}
       </div>
       {/* Promotion Modal for Employee Cards */}
