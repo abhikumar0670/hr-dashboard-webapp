@@ -241,6 +241,14 @@ export default function EmployeeDetailsPage() {
               <StarSolidIcon className="h-5 w-5" />
               Promote
             </Button>
+            <Button
+              onClick={() => router.push(`/projects?employee=${employee.id}`)}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <ChartBarIcon className="h-5 w-5" />
+              Manage Projects & Goals
+            </Button>
           </div>
         </motion.div>
 

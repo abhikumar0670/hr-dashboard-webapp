@@ -12,6 +12,7 @@ import { StarIcon as StarOutlineIcon, BookmarkIcon } from '@heroicons/react/24/o
 import Link from 'next/link'
 import { getDepartmentColor, formatCurrency, departments, positions, skills } from '@/lib/utils'
 import { PromotionModal } from '@/components/modals/PromotionModal'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 
 export default function EmployeesPage() {
   const {
@@ -48,7 +49,7 @@ export default function EmployeesPage() {
   useEffect(() => {
     // Load employees if not already loaded
     const loadEmployees = async () => {
-      if (employees.length === 0) {
+      if (employees.length === 0 || employees.length < 10) { // Force reload if less than 10 employees
         setIsLoading(true)
         try {
           const response = await fetch('https://dummyjson.com/users?limit=20')
@@ -344,7 +345,21 @@ export default function EmployeesPage() {
           <div className="text-3xl font-bold text-white">{onLeaveCount}</div>
         </button>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Employees</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Employees ({employees.length})</h1>
+        <Button
+          onClick={() => {
+            // Clear storage and force reload
+            localStorage.removeItem('hr-dashboard-storage')
+            window.location.reload()
+          }}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <ArrowPathIcon className="h-4 w-4" />
+          Refresh Data
+        </Button>
+      </div>
       <AdvancedFilters
         searchQuery={searchQuery}
         departmentFilter={departmentFilter}

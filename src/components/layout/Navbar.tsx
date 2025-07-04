@@ -11,6 +11,7 @@ import { useState, useRef, useEffect } from 'react'
 const navigation = [
   { name: 'Dashboard', href: '/' },
   { name: 'Employees', href: '/employees' },
+  { name: 'Projects & Goals', href: '/projects' },
   { name: 'Bookmarks', href: '/bookmarks' },
   { name: 'Analytics', href: '/analytics' },
 ]
@@ -188,10 +189,28 @@ function NotificationBell() {
                       <span className="font-medium text-sm text-gray-900 dark:text-white">
                         {n.employeeName}
                       </span>
-                      <span className="text-xs text-gray-400 ml-2">{new Date(n.date).toLocaleString()}</span>
+                      <div className="flex items-center gap-2">
+                        {n.type && (
+                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                            n.type === 'project' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                            n.type === 'goal' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                            n.type === 'promotion' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                          }`}>
+                            {n.type}
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-400">{new Date(n.date).toLocaleString()}</span>
+                      </div>
                     </div>
                     <div className="text-xs text-gray-700 dark:text-gray-300 mt-1">
-                      Status changed: <span className="font-semibold">{n.oldStatus}</span> → <span className="font-semibold">{n.newStatus}</span>
+                      {n.type === 'project' || n.type === 'goal' ? (
+                        <span>{n.reason}</span>
+                      ) : (
+                        <>
+                          Status changed: <span className="font-semibold">{n.oldStatus}</span> → <span className="font-semibold">{n.newStatus}</span>
+                        </>
+                      )}
                     </div>
                     {n.reason && (
                       <div className="text-xs text-gray-500 mt-1">Reason: {n.reason}</div>

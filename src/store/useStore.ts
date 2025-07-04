@@ -84,6 +84,7 @@ type Notification = {
   newStatus: string
   reason?: string
   read: boolean
+  type?: 'status' | 'promotion' | 'project' | 'goal'
 }
 
 type Store = {

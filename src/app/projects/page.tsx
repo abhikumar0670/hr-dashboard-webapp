@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
+import { useSearchParams } from 'next/navigation'
 import { useStore } from '@/store/useStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -52,9 +53,10 @@ interface AllGoal {
   description: string
 }
 
-export default function ProjectsPage() {
-  const { employees, updateProjectStatus, addEmployeeGoal, addEmployeeProject, updateGoalStatus } = useStore()
+function ProjectsPageContent() {
+  const { employees, updateProjectStatus, addEmployeeGoal, addEmployeeProject, updateGoalStatus, notifications } = useStore()
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null)
+  const searchParams = useSearchParams()
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false)
   const [isAddGoalModalOpen, setIsAddGoalModalOpen] = useState(false)
   const [newProject, setNewProject] = useState({ name: '', progress: 0, status: 'active' as const })
@@ -127,6 +129,18 @@ export default function ProjectsPage() {
     )
   }
 
+  // Handle URL parameter for employee selection
+  useEffect(() => {
+    const employeeParam = searchParams.get('employee')
+    if (employeeParam && employees.length > 0) {
+      const employeeId = Number(employeeParam)
+      const employee = employees.find(emp => emp.id === employeeId)
+      if (employee) {
+        setSelectedEmployee(employeeId)
+      }
+    }
+  }, [searchParams, employees])
+
   const projectStats = getProjectStats()
   const goalStats = getGoalStats()
   const allProjects = getAllProjects()
@@ -146,14 +160,42 @@ export default function ProjectsPage() {
     }
 
     addEmployeeProject(selectedEmployee, projectData)
+    addNotification(selectedEmployee, `New Project Added: ${newProject.name}`)
     setNewProject({ name: '', progress: 0, status: 'active' })
     setIsAddProjectModalOpen(false)
     setSelectedEmployee(null)
   }
 
+  // Notify changes to project and goal addition
+  const addNotification = (employeeId: number, message: string) => {
+    const employee = employees.find(emp => emp.id === employeeId)
+    if (!employee) return
+    
+    // We'll use the existing notification system from the store
+    const notification = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      date: new Date().toISOString(),
+      employeeId: employeeId,
+      employeeName: `${employee.firstName} ${employee.lastName}`,
+      oldStatus: '',
+      newStatus: message,
+      reason: message,
+      read: false,
+    }
+    
+    // Update notifications in store directly
+    useStore.setState(state => ({
+      notifications: [{
+        ...notification,
+        type: message.includes('Project') ? 'project' as const : 'goal' as const
+      }, ...state.notifications]
+    }))
+  }
+
+  // Handle Goal Addition with Notification
   const handleAddGoal = () => {
     if (!selectedEmployee || !newGoal.title) return
-    
+
     const goalData = {
       id: `goal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: newGoal.title,
@@ -163,6 +205,7 @@ export default function ProjectsPage() {
     }
 
     addEmployeeGoal(selectedEmployee, goalData)
+    addNotification(selectedEmployee, `New Goal Added: ${newGoal.title}`)
     setNewGoal({ title: '', description: '', targetDate: '', status: 'pending' })
     setIsAddGoalModalOpen(false)
     setSelectedEmployee(null)
@@ -661,5 +704,23 @@ export default function ProjectsPage() {
         </div>
       )}
     </motion.div>
+  )
+}
+
+// Loading component for suspense boundary
+function ProjectsPageLoading() {
+  return (
+    <div className="flex h-64 items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+    </div>
+  )
+}
+
+// Main export with Suspense boundary
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={<ProjectsPageLoading />}>
+      <ProjectsPageContent />
+    </Suspense>
   )
 }
