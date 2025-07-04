@@ -347,11 +347,11 @@ export default function EmployeesPage() {
       </div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {employeeTab === 'all' && `All Employees (${employeesToShow.length})`}
-          {employeeTab === 'active' && `Active Employees (${employeesToShow.length})`}
-          {employeeTab === 'inactive' && `Inactive Employees (${employeesToShow.length})`}
-          {employeeTab === 'terminated' && `Terminated Employees (${employeesToShow.length})`}
-          {employeeTab === 'on leave' && `On Leave Employees (${employeesToShow.length})`}
+          {employeeTab === 'all' && 'All Employees'}
+          {employeeTab === 'active' && 'Active Employees'}
+          {employeeTab === 'inactive' && 'Inactive Employees'}
+          {employeeTab === 'terminated' && 'Terminated Employees'}
+          {employeeTab === 'on leave' && 'On Leave Employees'}
         </h1>
         <Button
           onClick={() => {
